@@ -14,15 +14,15 @@ except:
 finally:
     from .__debug import Console
     console = Console(log_level)
-    
+
 
 clouds = [
     {
-        "short": "US", 
+        "short": "US",
         "host": "api.mist.com"
-    }, 
+    },
     {
-        "short": "EU", 
+        "short": "EU",
         "host": "api.eu.mist.com"
     }
 ]
@@ -32,11 +32,10 @@ clouds = [
 class Mist_Session(Req):
     """Class managing REST login and requests"""
 
-    def __init__(self, session_file=None, load_settings=True, email="", password="", apitoken=None, host=None):    
+    def __init__(self, session_file=None, load_settings=True, email="", password="", apitoken=None, host=None):
 
         # user and https session parameters
         self.host = host
-        if not self.host: self.host = self._select_cloud()
         self.email = email
         self.password = password
         self.first_name = ""
@@ -56,10 +55,11 @@ class Mist_Session(Req):
         if self.authenticated == False:
             self._credentials(load_settings)
         # if successfuly authenticated
+        if not self.host: self.host = self._select_cloud()
         if (self.get_authenticated()): self.getself()
         # if authentication failed, exit with error code 255
         else:
-            console.alert("Authentication failed... Exiting...") 
+            console.alert("Authentication failed... Exiting...")
             exit(255)
 
     def __str__(self):
@@ -82,7 +82,7 @@ class Mist_Session(Req):
                 string += "\r\n"
         return string
 
-    def _restore_session(self, file):                
+    def _restore_session(self, file):
         console.info("Restoring session...")
         try:
             with open(file, 'r') as f:
@@ -96,7 +96,7 @@ class Mist_Session(Req):
                         self.host = line["host"]
             console.info("Session restored.")
             console.debug("Cookies > %s" % self.session.cookies)
-            console.debug("Host > %s" % self.host) 
+            console.debug("Host > %s" % self.host)
             self._set_authenticated(True)
             valid = self.getself()
             if valid == False:
@@ -104,7 +104,7 @@ class Mist_Session(Req):
                 self._set_authenticated(False)
 
         except:
-            console.error("Unable to load session...")      
+            console.error("Unable to load session...")
 
     def _select_cloud(self):
         loop = True
@@ -117,12 +117,12 @@ class Mist_Session(Req):
                 i+=1
             resp = input("\r\nSelect a Cloud (0 to %s, or q to exit): " %i)
             if resp == "q":
-                exit(0)    
+                exit(0)
             else:
                 try:
                     resp_num = int(resp)
                     if resp_num >= 0 and resp_num <= i:
-                        return clouds[resp_num]["host"]                        
+                        return clouds[resp_num]["host"]
                         loop = False
                     else:
                         print("Please enter a number between 0 and %s." %i)
@@ -142,15 +142,15 @@ class Mist_Session(Req):
                 if "host" in credentials: self.host = credentials["host"]
                 else: self._select_cloud()
                 if "apitoken" in credentials: self._set_apitoken(credentials["apitoken"])
-                elif "email" in credentials: 
+                elif "email" in credentials:
                     self.email = credentials["email"]
                     if "password" in credentials:
                             self.password = credentials["password"]
-                    else: 
+                    else:
                         self.password = getpass("Password:")
                 else:
                     console.error("Credentials invalid... Can't use the information from config.py...")
-                    raise ValueError            
+                    raise ValueError
         except:
             console.notice("No login file found. Asking for credentials")
             self.email = input("Login: ")
@@ -204,7 +204,7 @@ class Mist_Session(Req):
     def _set_authenticated(self, value):
         if value == True:
             self.authenticated = True
-            if not self.apitoken: 
+            if not self.apitoken:
                 self.csrftoken = self.session.cookies['csrftoken']
                 self.session.headers.update({'X-CSRFToken': self.csrftoken})
         elif value == False:
@@ -248,7 +248,7 @@ class Mist_Session(Req):
             exit(255)
             return False
 
-    def two_factor_authentication_token(self, two_factor):        
+    def two_factor_authentication_token(self, two_factor):
         uri = "/api/v1/login/two_factor"
         body = { "two_factor": two_factor }
         resp = self.session.post(self._url(uri), json=body)
@@ -260,8 +260,8 @@ class Mist_Session(Req):
             console.error("2FA authentication failed")
             console.error("Error code: %s" % resp.status_code)
             exit(255)
-            return False        
-    
+            return False
+
     def getself(self):
         """Retrieve information about the current user and store them in the current object.
         Params: password (optional. Only needed for 2FA processing)
@@ -282,7 +282,7 @@ class Mist_Session(Req):
                         self.getself()
                 elif (self.two_factor_authentication(two_factor) == True):
                     self.getself()
-            # Get details of the account 
+            # Get details of the account
             else:
                 for key, val in resp['result'].items():
                     if key == "privileges":

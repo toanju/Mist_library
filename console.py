@@ -10,12 +10,12 @@ def help():
     This Python3 module is built to help you to use and test Mist Library
 
     Help:
-    When this module is imported, it will automatically authenticate you, create a Mist session, and 
+    When this module is imported, it will automatically authenticate you, create a Mist session, and
     store is into the variable
             console.session
 
     You can use it afterward with Mist Library request. For example, you can do:
-    The you will be able to use the script to generate and send request to the Mist Cloud. For example, 
+    The you will be able to use the script to generate and send request to the Mist Cloud. For example,
     you can do:
             console.mlib.orgs.channels.country_codes_get(console.session)
 
@@ -37,15 +37,15 @@ def get_org_id():
     print("Selected org id: %s" %org_id)
     return org_id
 
-def get_site_id():
-    site_id = cli.select_site(session)
+def get_site_id(org_id=None):
+    site_id = cli.select_site(session, org_id=org_id)
     print("")
     print("Selected site id: %s" %site_id)
     return site_id
 
 def show(response):
     cli.show(response)
-    
+
 def __init():
     import mlib
     session = mlib.Mist_Session()
